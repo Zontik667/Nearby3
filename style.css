@@ -1,0 +1,325 @@
+/* ==========================================================
+   Рядом — стили для пожилых пользователей
+   Принципы: высокий контраст, крупный текст, крупные кнопки,
+   минимум визуального шума, понятные иконки.
+   ========================================================== */
+
+:root {
+  --ink: #0a0f1a;
+  --paper: #ffffff;
+  --soft: #eef2f9;
+  --blue: #0047e0;
+  --route: #0057ff;
+  --yellow: #ffd60a;
+  --green: #007a3d;
+  --red: #d00000;
+  --red-dark: #7a0000;
+  --radius: 22px;
+  --fs: 20px;            /* базовый размер текста (меняется кнопкой «Aa») */
+  --panel-w: 440px;
+  --topbar-h: 150px;     /* обновляется из script.js */
+  --panel-h: 0px;        /* обновляется из script.js */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { font-size: var(--fs); -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  font-family: 'Golos Text', 'Segoe UI', Roboto, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--soft);
+}
+
+[hidden] { display: none !important; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.skip {
+  position: fixed; left: 8px; top: -80px; z-index: 5000;
+  background: var(--yellow); color: var(--ink); padding: 12px 16px;
+  border: 4px solid var(--ink); border-radius: 12px; font-weight: 800;
+}
+.skip:focus { top: 8px; }
+
+/* Заметный фокус для клавиатуры */
+:focus-visible {
+  outline: 5px solid var(--ink);
+  box-shadow: 0 0 0 10px var(--yellow);
+}
+
+/* ---------- Карта ---------- */
+#map { position: fixed; inset: 0; z-index: 0; background: #dfe6ef; }
+
+.leaflet-top { top: var(--topbar-h); }
+.leaflet-bottom { bottom: var(--panel-h); }
+
+.leaflet-bar { border: 0 !important; box-shadow: none !important; }
+.leaflet-bar a {
+  width: 58px !important; height: 58px !important; line-height: 54px !important;
+  font-size: 34px !important; font-weight: 800; color: var(--ink) !important;
+  background: var(--paper) !important; border: 4px solid var(--ink) !important;
+  margin-bottom: 10px; border-radius: 16px !important;
+  font-family: inherit;
+}
+.leaflet-bar a:hover { background: var(--yellow) !important; }
+
+.leaflet-control-attribution { font-size: 13px !important; padding: 2px 8px !important; }
+
+/* Метки на карте */
+.pin-me span {
+  display: block; position: relative; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--route); border: 5px solid #fff;
+  box-shadow: 0 0 0 3px var(--ink), 0 3px 10px rgba(0, 0, 0, .4);
+}
+.pin-me span::after {
+  content: ''; position: absolute; inset: -14px; border-radius: 50%;
+  border: 4px solid var(--route); opacity: 0; animation: ping 2s ease-out infinite;
+}
+@keyframes ping { 0% { transform: scale(.4); opacity: .9; } 100% { transform: scale(1.2); opacity: 0; } }
+
+.pin-dest span {
+  display: block; font-size: 44px; line-height: 44px;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .55));
+}
+
+.tip-me, .tip-dest {
+  font: 800 1rem 'Golos Text', Arial, sans-serif;
+  color: var(--ink); border: 3px solid var(--ink); border-radius: 12px;
+  padding: 4px 10px; box-shadow: none;
+}
+.tip-me { background: #fff; }
+.tip-dest { background: var(--yellow); }
+.tip-me::before, .tip-dest::before { display: none; }
+
+/* ---------- Верхняя панель ---------- */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 12px;
+  background: var(--paper); border-bottom: 4px solid var(--ink);
+}
+
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.6rem; }
+.brand__logo { font-size: 1.8rem; }
+
+.icon-btn {
+  min-width: 60px; height: 60px; padding: 0 12px;
+  font: 800 1.35rem 'Golos Text', Arial, sans-serif; color: var(--ink);
+  background: var(--paper); border: 4px solid var(--ink); border-radius: 16px;
+  cursor: pointer;
+}
+.icon-btn:active { background: var(--yellow); }
+
+.search { grid-column: 1 / -1; display: flex; gap: 10px; }
+.search input {
+  flex: 1; min-width: 0; height: 64px; padding: 0 16px;
+  font: 600 1.1rem 'Golos Text', Arial, sans-serif; color: var(--ink);
+  background: var(--paper); border: 4px solid var(--ink); border-radius: 16px;
+}
+.search input::placeholder { color: #4a5568; }
+.search__go { min-height: 64px; padding: 0 18px; flex-direction: row; gap: 8px; font-size: 1.1rem; white-space: nowrap; }
+
+/* ---------- Нижняя панель ---------- */
+.panel {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+  max-height: 58vh; max-height: 58dvh; overflow-y: auto; overscroll-behavior: contain;
+  padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 16px);
+  background: var(--paper);
+  border-top: 4px solid var(--ink); border-radius: 28px 28px 0 0;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, .25);
+}
+
+.panel__handle {
+  display: block; width: 100%; min-height: 52px; margin-bottom: 12px;
+  font: 700 1rem 'Golos Text', Arial, sans-serif; color: var(--ink);
+  background: var(--soft); border: 3px solid var(--ink); border-radius: 14px; cursor: pointer;
+}
+
+.panel.is-collapsed .actions,
+.panel.is-collapsed .bot,
+.panel.is-collapsed .link-btn { display: none; }
+
+.status {
+  margin: 0 0 12px; padding: 12px 14px; font-size: 1.05rem; font-weight: 700;
+  background: #e5eeff; border: 3px solid var(--ink); border-radius: 16px;
+}
+.status--warn { background: #fff0b3; }
+.status--error { background: #ffd9d9; }
+.status--ok { background: #d9f5e3; }
+
+/* ---------- Кнопки ---------- */
+.btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-height: 96px; padding: 10px 12px; text-align: center; text-decoration: none;
+  font: 800 1.15rem/1.2 'Golos Text', Arial, sans-serif; color: var(--ink);
+  background: var(--paper); border: 4px solid var(--ink); border-radius: 20px;
+  box-shadow: 0 5px 0 var(--ink); cursor: pointer; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
+.btn small { display: block; font-size: .8em; font-weight: 600; }
+.btn__icon { font-size: 2.4rem; line-height: 1; }
+
+.btn--yellow { background: var(--yellow); }
+.btn--green { background: var(--green); color: #fff; }
+.btn--blue { background: var(--blue); color: #fff; }
+.btn--red { background: var(--red); color: #fff; }
+.btn--light { background: var(--paper); color: var(--ink); }
+.btn--square { min-width: 64px; min-height: 64px; padding: 0; font-size: 1.6rem; }
+
+.btn--mini { min-height: 54px; padding: 8px 14px; font-size: 1rem; border-radius: 16px; box-shadow: 0 3px 0 var(--ink); }
+
+.btn--sos { grid-column: 1 / -1; min-height: 108px; background: var(--red); color: #fff; font-size: 1.5rem; flex-direction: row; gap: 14px; }
+.btn--sos .btn__icon { font-size: 2.8rem; }
+
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 8px; }
+
+.link-btn {
+  display: block; width: 100%; min-height: 52px; margin: 6px 0 14px;
+  font: 700 1rem 'Golos Text', Arial, sans-serif; color: var(--blue);
+  background: none; border: 0; text-decoration: underline; text-underline-offset: 4px; cursor: pointer;
+}
+
+/* ---------- Карточка маршрута ---------- */
+.route {
+  margin-bottom: 14px; padding: 14px; background: #e5eeff;
+  border: 4px solid var(--route); border-radius: 20px;
+}
+.route__label { margin: 0; font-size: .9rem; font-weight: 800; color: var(--blue); text-transform: uppercase; letter-spacing: .04em; }
+.route__title { margin: 2px 0 6px; font-size: 1.35rem; line-height: 1.25; }
+.route__stats { margin: 0 0 8px; font-size: 1.6rem; font-weight: 800; }
+.route__note { margin: 0 0 8px; font-size: 1rem; font-weight: 700; }
+.route__steps { margin-bottom: 10px; font-size: 1.05rem; }
+.route__steps summary { min-height: 48px; display: flex; align-items: center; font-weight: 800; cursor: pointer; }
+.route__steps ol { margin: 6px 0 0; padding-left: 1.4em; }
+.route__steps li { margin-bottom: 8px; }
+.route__buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.route__buttons .btn { flex: 1 1 160px; flex-direction: row; gap: 8px; }
+
+/* ---------- Помощник ---------- */
+.bot { padding-top: 6px; border-top: 4px solid var(--ink); }
+.bot__title { margin: 14px 0 0; font-size: 1.4rem; }
+.bot__sub { margin: 2px 0 10px; font-size: 1rem; color: #2d3748; }
+
+.chat { display: flex; flex-direction: column; gap: 10px; max-height: 240px; overflow-y: auto; padding: 4px 2px 8px; }
+
+.msg { max-width: 94%; padding: 12px 14px; font-size: 1.1rem; border: 3px solid var(--ink); border-radius: 18px; }
+.msg p { margin: 0; }
+.msg--bot { align-self: flex-start; background: #e5eeff; border-bottom-left-radius: 4px; }
+.msg--user { align-self: flex-end; background: #fff3b0; border-bottom-right-radius: 4px; }
+.msg--typing { opacity: .7; font-style: italic; }
+.msg__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.msg__actions .btn { flex-direction: row; gap: 6px; min-height: 52px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+.chip {
+  min-height: 52px; padding: 8px 14px;
+  font: 700 1rem 'Golos Text', Arial, sans-serif; color: var(--ink);
+  background: var(--paper); border: 3px solid var(--ink); border-radius: 999px; cursor: pointer;
+}
+.chip:active { background: var(--yellow); }
+
+.bot__form { display: flex; gap: 8px; }
+.bot__form input {
+  flex: 1; min-width: 0; height: 64px; padding: 0 14px;
+  font: 600 1.05rem 'Golos Text', Arial, sans-serif; color: var(--ink);
+  background: var(--paper); border: 4px solid var(--ink); border-radius: 16px;
+}
+.bot__form input::placeholder { color: #4a5568; }
+#micBtn.is-live { background: var(--red); color: #fff; animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.08); } }
+
+/* ---------- Окна ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  display: flex; align-items: center; justify-content: center; padding: 14px;
+  background: rgba(10, 15, 26, .78); overflow-y: auto;
+}
+
+.sheet {
+  width: min(560px, 100%); max-height: 94vh; max-height: 94dvh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px; padding: 20px;
+  background: var(--paper); border: 5px solid var(--ink); border-radius: 28px;
+}
+.sheet h2 { margin: 0; font-size: 1.7rem; }
+.sheet label { font-size: 1.1rem; font-weight: 800; margin-top: 4px; }
+.sheet input {
+  height: 64px; padding: 0 14px; width: 100%;
+  font: 600 1.1rem 'Golos Text', Arial, sans-serif; color: var(--ink);
+  background: var(--paper); border: 4px solid var(--ink); border-radius: 16px;
+}
+.sheet__hint { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.sheet__row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px; }
+
+/* Звонок */
+.sheet--call { text-align: center; align-items: stretch; }
+.call__icon { font-size: 4rem; line-height: 1; animation: ring 1.2s ease-in-out infinite; }
+@keyframes ring {
+  0%, 60%, 100% { transform: rotate(0); }
+  10%, 30%, 50% { transform: rotate(-16deg); }
+  20%, 40% { transform: rotate(16deg); }
+}
+.call__phone { margin: 0; font-size: 1.6rem; font-weight: 800; }
+.call__status { margin: 0; min-height: 3em; font-size: 1.1rem; font-weight: 700; }
+.sheet--call .btn { flex-direction: row; gap: 10px; min-height: 92px; font-size: 1.5rem; }
+
+/* СОС */
+.overlay--sos { animation: sosflash 1s steps(2, jump-none) infinite; background: var(--red); }
+@keyframes sosflash { 0% { background: #d00000; } 100% { background: #7a0000; } }
+
+.sheet--sos { background: transparent; border: 0; color: #fff; text-align: center; }
+.sheet--sos h2 { font-size: 2.2rem; }
+.sos__icon { font-size: 4.2rem; line-height: 1; }
+.sos__lead { margin: 0; font-size: 1.25rem; font-weight: 700; }
+.sos__where {
+  margin: 0; padding: 12px 14px; font-size: 1.05rem; font-weight: 600; text-align: left;
+  color: var(--ink); background: #fff; border: 4px solid var(--ink); border-radius: 16px;
+}
+
+.btn--sos-call { min-height: 112px; background: #fff; color: var(--red); font-size: 1.8rem; }
+.btn--sos-alt { min-height: 80px; background: #fff; color: var(--ink); }
+.btn--sos-call, .btn--sos-alt { border-color: #fff; box-shadow: 0 5px 0 rgba(0, 0, 0, .6); }
+.sheet--sos :focus-visible { outline-color: var(--ink); box-shadow: 0 0 0 10px var(--yellow); }
+
+/* ---------- Широкие экраны: панель слева ---------- */
+@media (min-width: 900px) {
+  .leaflet-bottom { bottom: 0; }
+
+  .topbar { grid-template-columns: auto 1fr auto auto; gap: 14px; padding-bottom: 10px; }
+  .topbar .search { grid-column: auto; order: 2; }
+  .brand { order: 1; }
+  .icon-btn { order: 3; }
+
+  .panel {
+    left: 16px; right: auto; bottom: 16px; top: calc(var(--topbar-h) + 16px);
+    width: var(--panel-w); max-height: none;
+    border: 4px solid var(--ink); border-radius: 28px;
+  }
+  .panel__handle { display: none; }
+  .panel.is-collapsed .actions, .panel.is-collapsed .bot, .panel.is-collapsed .link-btn { display: grid; }
+  .panel.is-collapsed .bot { display: block; }
+  .panel.is-collapsed .link-btn { display: block; }
+}
+
+/* ---------- Узкие телефоны ---------- */
+@media (max-width: 380px) {
+  .btn { font-size: 1.05rem; min-height: 88px; }
+  .btn--sos { font-size: 1.3rem; }
+  .search__go { padding: 0 12px; }
+}
+
+/* ---------- Уважаем настройку «меньше анимации» ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .overlay--sos { background: var(--red); }
+}

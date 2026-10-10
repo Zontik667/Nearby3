@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Рядом — простой и понятный навигатор для пожилых людей: дорога домой, звонок родным, помощь одним нажатием.">
+  <title>Рядом — простой навигатор</title>
+
+  <!-- Шрифт -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet (карты OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- Наши стили -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#panel">Перейти к кнопкам</a>
+
+  <!-- Карта на весь экран -->
+  <div id="map" role="application" aria-label="Карта"></div>
+
+  <!-- Верхняя панель: название и поиск -->
+  <header id="topbar" class="topbar">
+    <div class="brand">
+      <span class="brand__logo" aria-hidden="true">📍</span>
+      <span class="brand__name">Рядом</span>
+    </div>
+    <button id="fontBtn" type="button" class="icon-btn" aria-label="Изменить размер текста" title="Размер текста">Aa</button>
+    <button id="voiceBtn" type="button" class="icon-btn" aria-pressed="true" aria-label="Голос включён" title="Голосовые подсказки">🔊</button>
+
+    <form id="searchForm" class="search" role="search">
+      <label for="searchInput" class="sr-only">Куда вы хотите пойти?</label>
+      <input id="searchInput" type="search" placeholder="Аптека, рынок или улица…" autocomplete="off" enterkeyhint="search">
+      <button type="submit" class="btn btn--blue search__go"><span aria-hidden="true">🧭</span> Куда идти?</button>
+    </form>
+  </header>
+
+  <!-- Нижняя панель: главные кнопки и помощник -->
+  <main id="panel" class="panel" aria-label="Главные действия">
+    <button id="panelHandle" type="button" class="panel__handle" aria-expanded="true">⌄ Скрыть кнопки (смотреть карту)</button>
+
+    <p id="status" class="status" role="status" aria-live="polite" hidden></p>
+
+    <!-- Карточка маршрута -->
+    <div id="routeCard" class="route" hidden>
+      <p class="route__label">Дорога построена</p>
+      <h2 id="routeTitle" class="route__title"></h2>
+      <p id="routeStats" class="route__stats"></p>
+      <p id="routeNote" class="route__note" hidden></p>
+      <details class="route__steps">
+        <summary>Пошаговая подсказка</summary>
+        <ol id="routeSteps"></ol>
+      </details>
+      <div class="route__buttons">
+        <button id="routeSpeak" type="button" class="btn btn--mini btn--light">🔊 Повторить голосом</button>
+        <button id="routeClear" type="button" class="btn btn--mini btn--red">✖ Убрать дорогу</button>
+      </div>
+    </div>
+
+    <!-- Главные кнопки -->
+    <div class="actions">
+      <button id="homeBtn" type="button" class="btn btn--yellow">
+        <span class="btn__icon" aria-hidden="true">🏠</span>
+        <span class="btn__label">Домой</span>
+      </button>
+      <button id="callBtn" type="button" class="btn btn--green">
+        <span class="btn__icon" aria-hidden="true">📞</span>
+        <span class="btn__label">Позвонить родным</span>
+      </button>
+      <button id="whereBtn" type="button" class="btn btn--blue">
+        <span class="btn__icon" aria-hidden="true">📍</span>
+        <span class="btn__label">Где я?</span>
+      </button>
+      <button id="sosBtn" type="button" class="btn btn--sos">
+        <span class="btn__icon" aria-hidden="true">🆘</span>
+        <span class="btn__label">СОС / Скорая</span>
+      </button>
+    </div>
+
+    <button id="settingsBtn" type="button" class="link-btn">⚙ Мой дом и номер родных</button>
+
+    <!-- ИИ-ассистент -->
+    <section class="bot" aria-labelledby="botTitle">
+      <h2 id="botTitle" class="bot__title"><span aria-hidden="true">🤖</span> Рядом-Бот</h2>
+      <p class="bot__sub">Спросите меня — отвечу просто и спокойно.</p>
+
+      <div id="chat" class="chat" aria-live="polite"></div>
+
+      <div class="chips">
+        <button type="button" class="chip" data-ask="Где я?">📍 Где я?</button>
+        <button type="button" class="chip" data-ask="Как пройти в аптеку?">💊 Аптека</button>
+        <button type="button" class="chip" data-ask="Где поликлиника?">🏥 Поликлиника</button>
+        <button type="button" class="chip" data-ask="Где магазин?">🛒 Магазин</button>
+        <button type="button" class="chip" data-ask="Мне плохо">😟 Мне плохо</button>
+      </div>
+
+      <form id="botForm" class="bot__form" autocomplete="off">
+        <label for="botInput" class="sr-only">Напишите вопрос помощнику</label>
+        <input id="botInput" type="text" placeholder="Напишите вопрос…" enterkeyhint="send">
+        <button id="micBtn" type="button" class="btn btn--light btn--square" aria-label="Говорить вместо набора текста" aria-pressed="false">🎤</button>
+        <button type="submit" class="btn btn--blue btn--square" aria-label="Отправить">➤</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Окно: мои данные -->
+  <div id="settingsOverlay" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <form id="settingsForm" class="sheet" autocomplete="off">
+      <h2 id="settingsTitle">⚙ Мои данные</h2>
+      <p id="settingsHint" class="sheet__hint">Данные хранятся только на этом устройстве.</p>
+
+      <label for="homeInput">🏠 Домашний адрес</label>
+      <input id="homeInput" type="text" placeholder="Город, улица, дом" enterkeyhint="next">
+      <button type="button" id="useHereBtn" class="btn btn--mini btn--light">📍 Я сейчас дома — запомнить это место</button>
+
+      <label for="relNameInput">👪 Кому звонить?</label>
+      <input id="relNameInput" type="text" placeholder="Например: Дочь Анна" enterkeyhint="next">
+
+      <label for="relPhoneInput">📞 Номер телефона</label>
+      <input id="relPhoneInput" type="tel" inputmode="tel" placeholder="+7 " enterkeyhint="done">
+
+      <div class="sheet__row">
+        <button type="submit" class="btn btn--green">✅ Сохранить</button>
+        <button type="button" id="settingsClose" class="btn btn--light">Закрыть</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Окно: звонок родным -->
+  <div id="callOverlay" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="callName">
+    <div class="sheet sheet--call">
+      <div class="call__icon" aria-hidden="true">📞</div>
+      <h2 id="callName">Родные</h2>
+      <p id="callPhone" class="call__phone"></p>
+      <p id="callStatus" class="call__status" role="status"></p>
+      <a id="callGo" class="btn btn--green" href="tel:">📞 Позвонить</a>
+      <button id="callEnd" type="button" class="btn btn--red">✖ Отбой</button>
+    </div>
+  </div>
+
+  <!-- Экран: СОС / Скорая -->
+  <div id="sosOverlay" class="overlay overlay--sos" hidden role="alertdialog" aria-modal="true" aria-labelledby="sosTitle" aria-describedby="sosAddress">
+    <div class="sheet sheet--sos">
+      <div class="sos__icon" aria-hidden="true">🚨</div>
+      <h2 id="sosTitle">Нужна помощь?</h2>
+      <p class="sos__lead">Нажмите большую кнопку и скажите: «Мне нужна скорая помощь».</p>
+
+      <a id="sosCall103" class="btn btn--sos-call" href="tel:103">📞 Позвонить 103<small>Скорая помощь</small></a>
+      <a id="sosCall112" class="btn btn--sos-alt" href="tel:112">📞 Позвонить 112<small>Единая служба спасения</small></a>
+
+      <p class="sos__where"><strong>Ваше место:</strong> <span id="sosAddress">…</span></p>
+
+      <a id="sosSms" class="btn btn--sos-alt" href="sms:" hidden>✉ Сообщить родным, где я</a>
+
+      <div class="sheet__row">
+        <button id="sosMute" type="button" class="btn btn--sos-alt">🔇 Выключить звук</button>
+        <button id="sosCancel" type="button" class="btn btn--sos-alt">✔ Мне лучше, отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Библиотека карт и логика приложения -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
